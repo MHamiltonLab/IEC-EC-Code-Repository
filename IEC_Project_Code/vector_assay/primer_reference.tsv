@@ -1,0 +1,3 @@
+primer	sequence_5to3	length	strand	vector_positions	junction
+GSP_U5	GTGTGTGCCCGTCTGTTGTGTGACT	25	+	102;5561	3_prime
+GSP_R	GGCTTAAGCAGTGGGTTCCCTAGTT	25	-	46;5505	5_prime
