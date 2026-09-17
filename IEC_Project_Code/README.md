@@ -23,7 +23,7 @@ These scripts are not a stand alone data package and are intended to function as
 
 ## Reading and adapting the code
 
-Each analysis folder has a short README with its scripts, inputs, and principal outputs. Read [input contracts](docs/input_contracts.md) and [methodological notes](docs/methods_notes.md) alongside the code. [Empty input objects](inputs/schemas.R) describe the table interfaces without supplying observations.
+Each analysis folder has a short README with its scripts, inputs, and principal outputs. [Empty input objects](inputs/schemas.R) describe the table interfaces without supplying observations.
 
 These commands require appropriately populated inputs and the [listed dependencies](docs/dependencies.md). No dependency installation runs automatically.
 
