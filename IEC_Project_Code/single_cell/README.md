@@ -13,4 +13,4 @@ For the comprehensive workflow, set `POSCTRL_SAMPLE` explicitly. Paired subjects
 
 **Outputs:** Tables and vector/raster figures beneath `results/single_cell/<script>/`. The comprehensive script runs the paired-test helper on its per-patient downsampling medians. The helper can also read `paired_diversity_medians.tsv` independently or accept a numeric two-row matrix: rows are tissues, columns are matched patients. Three complete pairs give df = 2. Subsampling iterations are not independent patients, and these three metric tests have no multiplicity correction.
 
-Raw clonotype identifiers may be local to a sample. Pooled tissue summaries require identifiers that represent the same biological clone across samples; otherwise use per-sample summaries. See [input contracts](../docs/input_contracts.md) and [statistical reporting](../docs/statistical_reporting.md).
+Raw clonotype identifiers may be local to a sample. Pooled tissue summaries require identifiers that represent the same biological clone across samples; otherwise use per-sample summaries. See [input contracts](../docs/input_contracts.md).
