@@ -1,11 +1,16 @@
 # Single-cell analyses
 
-[car_tissue_repertoire.R](car_tissue_repertoire.R) compares CAR-positive cells in blood and ileum using an already processed Seurat object. It provides CAR/TCR UMAP overlays, clonotype sharing, repertoire diversity, matched-depth bootstrapping, transcriptional module scores, and patient-paired pseudobulk differential expression with Hallmark enrichment.
+| Script | Function |
+| --- | --- |
+| [car_tissue_repertoire.R](car_tissue_repertoire.R) | CAR/TCR overlays, clonotype sharing, diversity, matched-depth resampling, module scores, and paired pseudobulk expression with Hallmark enrichment. |
+| [clonotype_annotation.R](clonotype_annotation.R) | CAR UMI annotation and separate all-clonotyped and CAR-positive repertoire summaries by sample/tissue. |
+| [marker_expression.R](marker_expression.R) | Descriptive marker UMAPs and CAR-positive marker-expression distributions. |
+| [paired_diversity_tests.R](paired_diversity_tests.R) | Two-sided paired t-tests on patient-level summary values, with statistics, degrees of freedom, mean differences, 95% CIs, and P values. |
 
-**Inputs:** `single_cell_object.rds`, `single_cell_metadata.tsv`, and `hallmark_pathways.rds`. The Seurat object must already contain count data, a dimensional reduction, sample identifiers, and clonotype annotations. The script does not perform primary QC, integration, or TCR attachment.
+**Inputs:** A prepared `single_cell_object.rds`, `single_cell_metadata.tsv`, and, for enrichment, `hallmark_pathways.rds`. Primary QC, integration, and TCR attachment precede these analyses. Configure `CAR_GENE`, `CAR_MIN_UMI`, and clonotype fields near the script headers. The annotation script's `INCLUDE_REGEX` selects sample labels; adapt it to the supplied metadata.
 
-Set `POSCTRL_SAMPLE` to the positive-control sample identifier. Paired subjects are inferred from blood/ileum metadata; `PAIRED_PATIENTS` optionally supplies a comma-separated subset. `CAR_GENE` defaults to `CILTACELCAR`, with positivity defined by at least one UMI.
+For the comprehensive workflow, set `POSCTRL_SAMPLE` explicitly. Paired subjects are inferred from blood/ileum metadata; `PAIRED_PATIENTS` optionally restricts displays. Pseudobulk DESeq2 uses `~ patient_id + Tissue`. Matched-depth resampling defaults to 1,000 iterations and a 25-cell minimum.
 
-**Outputs:** Figures and tables under `results/single_cell/car_tissue_repertoire/`. Pseudobulk DESeq2 uses `~ patient_id + Tissue`. The default repertoire bootstrap uses 1,000 iterations and a 25-cell minimum.
+**Outputs:** Tables and vector/raster figures beneath `results/single_cell/<script>/`. The comprehensive script runs the paired-test helper on its per-patient downsampling medians. The helper can also read `paired_diversity_medians.tsv` independently or accept a numeric two-row matrix: rows are tissues, columns are matched patients. Three complete pairs give df = 2. Subsampling iterations are not independent patients, and these three metric tests have no multiplicity correction.
 
-Module-score labels are descriptive transcriptional summaries. 
+Raw clonotype identifiers may be local to a sample. Pooled tissue summaries require identifiers that represent the same biological clone across samples; otherwise use per-sample summaries. See [input contracts](../docs/input_contracts.md) and [statistical reporting](../docs/statistical_reporting.md).

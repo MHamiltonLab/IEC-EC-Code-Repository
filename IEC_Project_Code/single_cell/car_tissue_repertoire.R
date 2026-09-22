@@ -1136,6 +1136,12 @@ if (nrow(boot_df) > 0) {
   write.table(boot_med, file.path(OUTDIR,"tables","bootstrap_downsampled_medians.tsv"),
               sep="\t", quote=FALSE, row.names=FALSE)
 
+  source(file.path("single_cell", "paired_diversity_tests.R"), local = TRUE)
+  boot_tests <- paired_diversity_tests(boot_med)
+  write.table(boot_tests, file.path(OUTDIR, "tables", "downsampled_paired_t_tests.tsv"),
+              sep = "\t", quote = FALSE, row.names = FALSE)
+  print(boot_tests, digits = 8)
+
   boot_long_med <- boot_med %>%
     select(patient_id, Tissue_plot, shannon, inv_simpson, clonality) %>%
     pivot_longer(cols=c(shannon, inv_simpson, clonality),
@@ -1154,6 +1160,14 @@ if (nrow(boot_df) > 0) {
                          metric_label)
     }
     df <- boot_long_med %>% dplyr::filter(metric == metric_label)
+    metric_key <- switch(metric_label, "Shannon" = "shannon",
+                         "Inverse Simpson" = "inv_simpson",
+                         "Clonality (1 - Pielou)" = "clonality")
+    test_row <- boot_tests[boot_tests$metric == metric_key, , drop = FALSE]
+    test_label <- if (nrow(test_row) && test_row$status == "ok") {
+      paste0("Paired t-test: P = ", formatC(test_row$p_value, format = "g", digits = 3),
+             "; n = ", test_row$n_pairs, " pairs")
+    } else "Paired t-test: not estimable"
     ggplot(df, aes(x = Tissue_plot, y = value)) +
       geom_boxplot(outlier.shape = NA, alpha = 0.25, width = 0.55) +
       geom_point(aes(color = patient_id),
@@ -1161,7 +1175,7 @@ if (nrow(boot_df) > 0) {
                  position = position_jitter(width = 0.05, height = 0)) +
       geom_line(aes(group = patient_id),
                 color = "grey55", linewidth = 0.6, alpha = 0.85) +
-      labs(x = "", y = ylab_txt) +
+      labs(x = "", y = ylab_txt, subtitle = test_label) +
       theme_prism_safe(base_size = 14) +
       theme(
         legend.position = "none",
@@ -1176,7 +1190,7 @@ if (nrow(boot_df) > 0) {
 
   p_boot_med <- (p_bs1 | p_bs2 | p_bs3) +
     plot_annotation(
-      title = paste0("Bootstrap downsampled (median across ", BOOT_B, " iterations)"),
+      title = paste0("Matched-depth subsampling (median across ", BOOT_B, " iterations)"),
       theme = theme(plot.title = element_text(size = 14, face = "bold"))
     )
 
@@ -1185,15 +1199,6 @@ if (nrow(boot_df) > 0) {
   ggsave(file.path(OUTDIR,"plots","bootstrap_downsampled_median_paired_boxplots.png"),
          plot = p_boot_med, width = 18, height = 6, dpi = 600, bg = "white")
 
-  p_bs1 <- plot_boot_metric("Shannon")
-  p_bs2 <- plot_boot_metric("Inverse Simpson")
-  p_bs3 <- plot_boot_metric("Clonality (1 - Pielou)")
-  p_boot_med <- (p_bs1 | p_bs2 | p_bs3) +
-    plot_annotation(title="CAR+ diversity remains higher in Blood vs Ileum after matched-depth downsampling")
-  save_plot_eps(p_boot_med, file.path(OUTDIR,"plots","bootstrap_downsampled_median_paired_boxplots"),
-                width=18, height=6)
-  ggsave(file.path(OUTDIR,"plots","bootstrap_downsampled_median_paired_boxplots.png"),
-         plot=p_boot_med, width=18, height=6, dpi=600, bg="white")
 } else {
   cat("\n[BOOT] No bootstrap output produced (no eligible patients).\n")
 }
